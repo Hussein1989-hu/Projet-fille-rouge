@@ -1,0 +1,58 @@
+import Route from "./Route.js";
+import { allRoutes, websiteName } from "./AllRoutes.js";
+
+// Création d'une route pour la page 404 (page introuvable)
+const route404 = new Route("404", "Page introuvable", "/pages/404.html");
+
+// Fonction pour récupérer la route correspondant à une URL donnée
+const getRouteByUrl = (url) => {
+	let currentRoute = null;
+
+	// Parcours de toutes les routes pour trouver la correspondance
+	allRoutes.forEach((element) => {
+		if (element.url == url) {
+			currentRoute = element;
+		}
+	});
+
+	// Si aucune correspondance n'est trouvée, on retourne la route 404
+	if (currentRoute != null) {
+		return currentRoute;
+	} else {
+		return route404;
+	}
+};
+
+
+// Fonction pour charger le contenu de la page
+const LoadContentPage = async () => {
+	const path = window.location.pathname;
+
+	// Récupération de l'URL actuelle
+	const actualRoute = getRouteByUrl(path);
+
+	// Récupération du contenu HTML de la route
+	const html = await fetch(actualRoute.pathHtml)
+		.then((data) => data.text());
+
+	// Ajout du contenu HTML à l'élément avec l'ID "main-page"
+	document.getElementById("main-page").innerHTML = html;
+
+	// Ajout du contenu JavaScript
+	if (actualRoute.pathJs != "") {
+		// Création d'une balise script
+		var scriptTag = document.createElement("script");
+
+		scriptTag.setAttribute("type", "text/javascript");
+		scriptTag.setAttribute("src", actualRoute.pathJs);
+
+		// Ajout de la balise script au corps du document
+		document.querySelector("body").appendChild(scriptTag);
+	}
+
+	// Changement du titre
+	document.title = actualRoute.title;
+};
+
+LoadContentPage();
+
